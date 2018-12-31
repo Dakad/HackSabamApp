@@ -36,6 +36,23 @@ def detect_contours(image):
     return []
 
 
+def get_four_point(image, contour, ratio):
+    # Apply the 4-pt transform on the original image
+    return four_point_transform(image, contour.reshape(4, 2) * ratio)
+
+
+def transform(image, has_effect=False):
+    # Convert warped img to GRAY
+    warped = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    if has_effect == True:
+        # Threshold it
+        T = threshold_local(warped, 11, offset=10, method="gaussian")
+        # Apply 'black & white' paper effect
+        effect = (warped > T).astype("uint8") * 255
+
+    return (warped, effect)
+
+
 # construct the argument parser and parse the arguments
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument(
@@ -52,21 +69,30 @@ img = imutils.resize(image, height=500)
 
 print(" Evolution ")
 edged = detect_edge(img)
+## Show the original image, gray, blurried, edged detected imm
 # cv2.imshow("Original", img)
 # cv2.imshow("Edged", edged)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
 
-print(" Contour ")
-
 contours = detect_contours(edged.copy())
-if len(contours) != 0:
-    cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
-    cv2.imshow("Outline", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+if len(contours) == 0:
+    print(" No 4-pt contour found ")
+    raise SystemExit(0)
 
-# Show the original image, gray, blurried, edged detected imm
+print(" Contour ")
+# cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
+# cv2.imshow("Outline", img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
+
+print(" Perspective Transform")
+four_point = get_four_point(orig, contours[0], ratio)
+(warped, effect) = transform(four_point, has_effect=True)
+
+cv2.imshow("Original", img)
+cv2.imshow("Transform", imutils.resize(warped, height=500))
+cv2.imshow("Transform & effect", imutils.resize(effect, height=500))
 cv2.waitKey(0)
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
