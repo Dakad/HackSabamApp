@@ -1,0 +1,40 @@
+version: '2'
+
+volumes:
+  postgres_data: {}
+  mongodb_data: {}
+  env: {}
+
+services:
+  app:
+    build: .
+    # command:
+    volumes:
+      - .:/app
+    ports:
+      - '127.0.0.1:5000:5000'
+      - '127.0.0.1:8080:8080'
+    restart: always
+    depends_on:
+      - mysql
+      - nosql
+    # uncomment for debugging the service - container does not try to start dev server
+    #entrypoint: ["sh", "-c", "sleep infinity"]
+  mysql:
+    #https://hub.docker.com/_/postgres/
+    image: postgres:10-alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_SQL_USER}
+      POSTGRES_PASSWORD: ${DB_SQL_PWD}
+      POSTGRES_DB: ${DB_SQL_DB}
+    ports: #make db accessible locally
+      - '127.0.0.1:${DB_SQL_PORT}:5432'
+  nosql:
+    image: mongo:3.6.9
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - '127.0.0.1:27018:27017'
