@@ -23,16 +23,18 @@ RUN apk add --no-cache --virtual .build-deps \
 
 # copy scripts into the container for convenience (you could mount a folder as well)
 RUN mkdir -p /app
+RUN mkdir -p /pipeline/{tasks,uploads}
 
 WORKDIR /app
 
 COPY . /app
 
-# COPY ./requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
+COPY ./requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 
+EXPOSE 8080
 
 # Clear out the apk cache
 RUN apk del build-base && rm -rf /var/cache/apk/*

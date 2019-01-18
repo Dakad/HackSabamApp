@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en" style="background-color:#e9ecef">
+    <meta charset="UTF-8" />
+    <title>{{ escape(handler.settings['app_title']) }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ static_url('css/style.css') }}"
+      type="text/css"
+    />
+    {% block head %}{% end %}
+  </head>
+  <body>
+    <header>{% block header %}{% end %}</header>
+
+    <main>{% block body %}{% end %}</main>
+
+    <footer>{% block footer %}{% end %}</footer>
+  </body>
+</html>

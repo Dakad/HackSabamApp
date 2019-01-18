@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block body %}
+
+<legend>{{ title }}</legend>
+<form enctype="multipart/form-data" action="." method="POST">
+  <p>
+    Capture Image:
+    <input
+      type="file"
+      accept="image/*"
+      id="capture"
+      name="uploads"
+      capture="camera"
+      multiple
+    />
+
+    <input type="submit" />
+  </p>
+</form>
+
+{% end %}
