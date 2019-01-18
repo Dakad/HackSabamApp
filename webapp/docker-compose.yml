@@ -8,12 +8,11 @@ volumes:
 services:
   app:
     build: .
-    # command:
+    command: python -u __main__.py
     volumes:
       - .:/app
     ports:
-      - "127.0.0.1:5000:5000"
-      - "127.0.0.1:8080:8080"
+      - '127.0.0.1:8080:8080'
     restart: always
     depends_on:
       - mysql
@@ -31,10 +30,10 @@ services:
       POSTGRES_PASSWORD: db_pwd
       POSTGRES_DB: hack_sabam
     ports: #make db accessible locally
-      - "127.0.0.1:5433:5432"
+      - '127.0.0.1:5433:5432'
   nosql:
     image: mongo:3.6.9
     volumes:
       - mongodb_data:/data/db
     ports:
-      - "127.0.0.1:27019:27017"
+      - '127.0.0.1:27019:27017'
