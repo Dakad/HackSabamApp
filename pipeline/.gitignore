@@ -1,0 +1,8 @@
+
+# Custom
+process/
+tasks/
+uploads/
+failed/
+
+.fuse_hidden*
