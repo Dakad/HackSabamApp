@@ -4,5 +4,6 @@ process/
 tasks/
 uploads/
 failed/
+img/*
 
 .fuse_hidden*
