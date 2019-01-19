@@ -7,56 +7,58 @@ from improv import detect_contours, detect_edge, get_transform, deskew
 
 
 def process_4_pt(**args):
+    transform = None
+
     # Load the input image
     image = cv2.imread(args["image"])
     ratio = image.shape[0] / 500.0
     orig = image.copy()
+
     # Resize to speed up the processing
     img = imutils.resize(image, height=500)
-
-    print(" Evolution ")
-    edged = detect_edge(img)
-    # Show the original image, gray, blurried, edged detected imm
-    # cv2.imshow("Original", img)
-    # cv2.imshow("Edged", edged)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    contours = detect_contours(edged.copy())
-    if len(contours) == 0:
-        print(" No 4-pt contour found ")
-        raise SystemExit(0)
-
-    print(" Contour ")
-    # cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
-    # cv2.imshow("Outline", img)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    print(" Perspective Transform")
-    (warped, effect) = get_transform(
-        orig, contours[0], ratio, has_effect=False)
-
-    config = ("-l eng --oem 1 --psm 6")
-    resultat = pytesseract.image_to_string(warped, config=config)
-    print(resultat)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     cv2.imwrite("./process/4_pt_1img.jpg", img)
+    cv2.imwrite("./process/4_pt_1gray.jpg", gray)
 
-    # cv2.imshow("Original", img)
-    cv2.imwrite("./process/4_pt_2edged.jpg", edged)
-    # cv2.imshow("Transform", imutils.resize(warped, height=500))
-    cv2.imwrite("./process/4_pt_3warped.jpg", warped)
+    contours = detect_contours(cv2.Canny(gray, 75, 200))
+    if len(contours):
+        print(" 4 pt Contour detected ")
+        img2 = gray.copy()
+        cv2.drawContours(img2, contours, -1, (0, 255, 0), 2)
+        cv2.imwrite("./process/4_pt_2contours.jpg", img2)
+        # cv2.imshow("Outline", img)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
-    warped_edges = cv2.Canny(warped, 75, 200)
-    cv2.imwrite("./process/4_pt_3warped_edges.jpg", warped_edges)
+        print(" Perspective Transform")
+        (warped, effect) = get_transform(
+            orig, contours[0], ratio, has_effect=True)
 
-    if effect != None:
-        cv2.imwrite("./process/4_pt_4effect.jpg", effect)
-        # cv2.imshow("Transform & effect", imutils.resize(effect, height=500))
+        cv2.imwrite("./process/4_pt_3warped.jpg", warped)
 
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+        warped_edges = cv2.Canny(warped, 75, 200)
+        cv2.imwrite("./process/4_pt_3warped_edges.jpg", warped_edges)
+
+        if effect is not None:
+            cv2.imwrite("./process/4_pt_4effect.jpg", effect)
+
+        transform = warped
+    else:
+        print(" No 4-pt contour found ")
+        edged = detect_edge(img)
+
+        print("Deskew ...")
+        rotated = deskew(gray)['rotated']
+
+        cv2.imwrite("./process/4_pt_2edged.jpg", edged)
+        cv2.imwrite("./process/improv_deskew.jpg", rotated)
+
+        transform = rotated
+
+    config = ("-l eng --oem 1 --psm 6")
+    resultat = pytesseract.image_to_string(transform, config=config)
+    print(resultat)
 
 
 def improv(**args):
@@ -72,7 +74,7 @@ def improv(**args):
     cv2.imwrite("./process/improv_1img.jpg", image)
 
     #cv2.imshow("Dark", cv2.Canny(gray, 75, 200))
-    cv2.imwrite("./process/improv_2gray.jpg", cv2.bitwise_not(image))
+    cv2.imwrite("./process/improv_2gray.jpg", cv2.bitwise_not(gray))
 
     # cv2.putText(
     #     correct["rotated"],
@@ -99,4 +101,4 @@ if __name__ == "__main__":
     )
     args = vars(arg_parser.parse_args())
     process_4_pt(**args)
-    improv(**args)
+    # improv(**args)

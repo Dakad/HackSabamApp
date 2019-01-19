@@ -5,7 +5,8 @@ import cv2
 
 
 arg_parse = argparse.ArgumentParser()
-arg_parse.add_argument("-i", "--image", required=True, help="Path to input image file")
+arg_parse.add_argument("-i", "--image", required=True,
+                       help="Path to input image file")
 args = vars(arg_parse.parse_args())
 
 image = cv2.imread(args["image"])
@@ -36,10 +37,6 @@ for contour in hulls:
 edged = cv2.Canny(gray, 75, 200)
 
 # this is used to find only text regions, remaining are ignored
-text_only = cv2.bitwise_and(image, edged, mask=mask)
+text_only = cv2.bitwise_and(gray, edged, mask=mask)
 
-cv2.imshow("Original", image)
-cv2.imshow("text only", text_only)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+cv2.imwrite("./process/txt_only.jpg", text_only)
