@@ -6,7 +6,7 @@ import pytesseract
 from four_point_transform import detect_contours, detect_edge, get_transform
 
 
-def main(**args):
+def process_4_pt(**args):
     # Load the input image
     image = cv2.imread(args["image"])
     ratio = image.shape[0] / 500.0
@@ -63,4 +63,4 @@ if __name__ == "__main__":
         "-i", "--image", required=True, help="Path to the image to be scanned"
     )
     args = vars(arg_parser.parse_args())
-    main(**args)
+    process_4_pt(**args)
