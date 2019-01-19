@@ -3,34 +3,7 @@ import imutils
 import cv2
 import pytesseract
 
-from four_point_transform import detect_contours, detect_edge, get_transform
-
-
-def improv(**args):
-    image = cv2.imread(args["image"])
-    image = imutils.resize(image, height=750)
-
-    # Grayscale the img
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    correct = deskew(gray)
-
-    cv2.putText(
-        correct["rotated"],
-        "Angle : {:.2f} c".format(correct["to"]),
-        (10, 30),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 0, 0),
-        2,
-    )
-
-    # cv2.drawContours(tresh, coords, -1, (0, 255, 0), 2)
-    print("Rotation Angle : {:.3f}°".format(correct["to"]))
-    cv2.imshow("Original", image)
-    cv2.imshow("Dark", cv2.Canny(gray, 75, 200))
-    cv2.imshow("Rotated", correct["rotated"])
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+from improv import detect_contours, detect_edge, get_transform, deskew
 
 
 def process_4_pt(**args):
@@ -68,16 +41,51 @@ def process_4_pt(**args):
     resultat = pytesseract.image_to_string(warped, config=config)
     print(resultat)
 
-    cv2.imwrite("./process/transform_1img.jpg", img)
+    cv2.imwrite("./process/4_pt_1img.jpg", img)
 
     # cv2.imshow("Original", img)
-    cv2.imwrite("./process/transform_2edged.jpg", edged)
+    cv2.imwrite("./process/4_pt_2edged.jpg", edged)
     # cv2.imshow("Transform", imutils.resize(warped, height=500))
-    cv2.imwrite("./process/transform_3warped.jpg", warped)
+    cv2.imwrite("./process/4_pt_3warped.jpg", warped)
+
+    warped_edges = cv2.Canny(warped, 75, 200)
+    cv2.imwrite("./process/4_pt_3warped_edges.jpg", warped_edges)
 
     if effect != None:
-        cv2.imwrite("./process/transform_4effect.jpg", effect)
+        cv2.imwrite("./process/4_pt_4effect.jpg", effect)
         # cv2.imshow("Transform & effect", imutils.resize(effect, height=500))
+
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+
+def improv(**args):
+    image = cv2.imread(args["image"])
+    image = imutils.resize(image, height=750)
+
+    # Grayscale the img
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    correct = deskew(gray)
+
+    # cv2.drawContours(tresh, coords, -1, (0, 255, 0), 2)
+    #cv2.imshow("Original", image)
+    cv2.imwrite("./process/improv_1img.jpg", image)
+
+    #cv2.imshow("Dark", cv2.Canny(gray, 75, 200))
+    cv2.imwrite("./process/improv_2gray.jpg", cv2.bitwise_not(image))
+
+    # cv2.putText(
+    #     correct["rotated"],
+    #     "Angle : {:.2f} c".format(correct["to"]),
+    #     (10, 30),
+    #     cv2.FONT_HERSHEY_SIMPLEX,
+    #     0.7,
+    #     (255, 0, 0),
+    #     2,
+    # )
+    # cv2.imshow("Rotated", correct["rotated"])
+    print("Rotation Angle : {:.3f}°".format(correct["to"]))
+    cv2.imwrite("./process/improv_3rotated.jpg", correct['rotated'])
 
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
