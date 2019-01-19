@@ -1,6 +1,5 @@
 from skimage.filters import threshold_local
 import numpy as np
-import argparse
 import cv2
 import imutils
 
@@ -102,6 +101,8 @@ def get_transform(image, contour, ratio, has_effect=False):
     four_point = four_point_transform(image, contour.reshape(4, 2) * ratio)
     # Convert warped img to GRAY
     warped = cv2.cvtColor(four_point, cv2.COLOR_BGR2GRAY)
+
+    effect = None
     if has_effect == True:
         # Threshold it
         T = threshold_local(warped, 11, offset=10, method="gaussian")
@@ -109,4 +110,3 @@ def get_transform(image, contour, ratio, has_effect=False):
         effect = (warped > T).astype("uint8") * 255
 
     return (warped, effect)
-
