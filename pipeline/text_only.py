@@ -28,6 +28,7 @@ regions, _ = mser.detectRegions(gray)
 hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions]
 
 cv2.polylines(vis, hulls, 1, (0, 255, 0))
+cv2.imwrite("./process/txt_lines.jpg", vis)
 
 mask = np.zeros((image.shape[0], image.shape[1], 1), dtype=np.uint8)
 
@@ -38,5 +39,7 @@ edged = cv2.Canny(gray, 75, 200)
 
 # this is used to find only text regions, remaining are ignored
 text_only = cv2.bitwise_and(gray, edged, mask=mask)
-
 cv2.imwrite("./process/txt_only.jpg", text_only)
+
+if __name__ == "__main__":
+    pass

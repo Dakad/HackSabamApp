@@ -4,12 +4,24 @@
     python text_recognition.py --east frozen_east_text_detection.pb --image images/example_04.jpg --padding 0.05
 
 """
+# https://www.pyimagesearch.com/2018/09/17/opencv-ocr-and-text-recognition-with-tesseract/
+
 
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
 import argparse
 import cv2
+
+
+# Define the two output layer names for the EAST detector model
+layers = [
+    "feature_fusion/Conv_7/Sigmoid",  # Output probabilities
+    "feature_fusion/concat_3"  # Derive the bounding box coordinates of text
+]
+east_file = "./frozen_east_text_detection.pb"
+# Load the pre-trained EAST text detector
+net = cv2.dnn.readNet(east_file)
 
 
 def decode_predictions(scores, geometry):
@@ -99,19 +111,6 @@ def main(**args):
     img = cv2.resize(image, (new_width, new_height))
     (img_height, img_width) = img.shape[:2]
 
-    # Define the two output layer names for the EAST detector model
-    layers = [
-        "feature_fusion/Conv_7/Sigmoid",  # Output probabilities
-        "feature_fusion/concat_3"  # Derive the bounding box coordinates of text
-    ]
-
-    if(args["east"] is None):
-        raise SystemExit(1)
-
-    # Load the pre-trained EAST text detector
-    print("[INFO] Loading EAST text detector...")
-    net = cv2.dnn.readNet(args["east"])
-
     # Construct blob from the image and then perform a foratio_wdthard pass of
     # the model to obtain the two output layer sets
     blob = cv2.dnn.blobFromImage(img, 1.0, (img_width, img_height),
@@ -160,23 +159,28 @@ def main(**args):
     results = sorted(results, key=lambda r: r[0][1])
 
     # Loop over the results
-    for ((x_start, y_start, x_end, y_end), text) in results:
-        print("OCR TEXT : \n")
-        print("{}\n".format(text))
-
+    output = orig.copy()
+    ocr = ""
+    for (idx, result) in enumerate(results):
+        (x_start, y_start, x_end, y_end), text = result
         # Strip out non-ASCII text so we can draw the text on the image
         # Using OpenCV, then draw the text and a bounding box surrounding
         # the text region of the input image
         text = "".join([c if ord(c) < 128 else "" for c in text]).strip()
-        output = orig.copy()
-        cv2.rectangle(output, (x_start, y_start), (x_end, y_end),
-                      (0, 0, 255), 2)
-        # cv2.putText(output, text, (x_start, y_start - 20),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
 
-        # Show the output image
-        # cv2.imshow("Text Detection", output)
-        # cv2.waitKey(0)
+        ocr += text + "\t"
+
+        cv2.rectangle(output, (x_start, y_start), (x_end, y_end),
+                      (255, 0, 255), 2)
+        cv2.putText(output, str(idx+1), (x_start + 20, y_start),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+
+    # Show the output image
+    # cv2.imshow("Text Detection", output)
+    # cv2.waitKey(0)
+    print("OCR TEXT : \n")
+    print("%s\n" % ocr)
+    cv2.imwrite('./process/text_recognition.jpg', output)
 
 
 if __name__ == "__main__":
