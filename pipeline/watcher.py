@@ -1,10 +1,11 @@
 #! /usr/bin/python
 import os
 import time
+from threading import Thread
 
 _DEFAULT = {
     "task_path": "../data/tasks",
-    "idle_time": 60 * 10,
+    "idle_time": 60 * 10,  # 10 mins
 }
 
 
@@ -37,9 +38,38 @@ class Watcher():
                 (f, None) for f in os.listdir(Watcher.path_to_watch)
             ])
             new_files = [f for f in after if not f in Watcher.before]
-            print(new_files)
+
+            for (upload, _) in new_files:
+                Task(upload).start()
+
             Watcher.before = after
-            time.sleep(10)
+            time.sleep(Watcher.idle_time)
+
+
+class Task(Thread):
+    """Thread Task for an new upload file to process
+
+    Arguments:
+        Thread {string} -- The upload filename used also as name
+    """
+    _upload_id = None
+
+    def __init__(self, id):
+        Thread.__init__(self)
+        self.name = "Task #"+id
+        self._upload_id = id
+        print(self.name)
+
+    def run(self):
+        try:
+            print("New Task to do : Upload #%s" % self._upload_id)
+            # TODO : 1 - Optimise the uploaded image
+            # TODO : 2 - Send the optimised img to OCR
+            # TODO : 3 - Parse the OCR result
+            # TODO : 4 - Store the parsed result in NoSQL DB
+
+        finally:
+            # TODO: Notify the Watcher about the failed task
 
 
 if __name__ == "__main__":
