@@ -55,9 +55,29 @@ def apply_deskew(transform, gray):
 
 
 def ocr(transform, lang='eng', psm=6) -> str:
+    # OCR options :
+    # --oem NUM     Specify OCR Engine mode.
+    # OCR Engine modes:
+    #   0    Legacy engine only.
+    #   1    Neural nets LSTM engine only.
+    #   2    Legacy + LSTM engines.
+
+    # --psm NUM     Specify page segmentation mode.
+    # Page segmentation modes:
+    #  4    Assume a single column of text of variable sizes.
+    #  5    Assume a single uniform block of vertically aligned text.
+    #  6    Assume a single uniform block of text.
+    #  7    Treat the image as a single text line.
+
     config = ("-l %s --oem 1 --psm %d" % (lang, psm))
     resultat = pytesseract.image_to_string(transform, config=config)
     return resultat
+
+
+def parse(text: str) -> str:
+    # Strip out non-ASCII text
+    parsed = "".join([c if ord(c) < 128 else "" for c in text]).strip()
+    return parsed
 
 
 def main(**args):
