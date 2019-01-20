@@ -7,3 +7,4 @@ failed/
 img/*
 
 .fuse_hidden*
+frozen_*.pb
