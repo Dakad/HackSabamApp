@@ -4,6 +4,8 @@ import cv2
 import imutils
 
 
+# https://github.com/yardstick17/image_text_reader/blob/master/image_preprocessing/remove_noise.py
+
 def _order_points_(pts):
     # initialzie a list of coordinates that will be ordered
     # such that the first entry in the list is the top-left,
@@ -113,6 +115,11 @@ def get_transform(image, contour, ratio, has_effect=False):
 
 
 def deskew(image, gray):
+    """A Skewed image is defined as a image which is not straight.
+    Skewed images directly impact the line segmentation of OCR engine which reduces its accuracy
+
+    """
+
     # Flip the foreground
     gray = cv2.bitwise_not(gray)
 
@@ -164,3 +171,47 @@ def remove_shadow(image):
         result_planes.append(img_diff)
     result = cv2.merge(result_planes)
     return result
+
+
+def image_smoothening(img):
+    ret1, th1 = cv2.threshold(img, BINARY_THREHOLD, 255, cv2.THRESH_BINARY)
+    ret2, th2 = cv2.threshold(th1, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    blur = cv2.GaussianBlur(th2, (1, 1), 0)
+    ret3, th3 = cv2.threshold(
+        blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return th3
+
+
+def remove_noise(image):
+    """ Noise is a random variation of color or brightness btw pixels.
+        Noise decrease the readability of text from an image. 
+        There are two major types of noises : 
+            Salt & Pepper
+            Gaussian 
+    """
+    filtered = cv2.absdiff(image.astype(np.uint8), 255,
+                           cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 41)
+    kernel = np.ones((1, 1), np.uint8)
+    opening = cv2.morphologyEx(filtered, cv2.MORPH_OPEN, kernel)
+    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+
+    img = image_smoothening(image)
+    transform = cv2.bitwise_or(img, closing)
+    return transform
+
+
+def kmeans(input_img, k, i_val):
+    # _, thresh = cv2.threshold(img, kmeans(input_img=img, k=8, i_val=2)[0], 255, cv2.THRESH_BINARY)
+
+    hist = cv2.calcHist([input_img], [0], None, [256], [0, 256])
+    img = input_img.ravel()
+    img = np.reshape(img, (-1, 1))
+    img = img.astype(np.float32)
+
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    flags = cv2.KMEANS_RANDOM_CENTERS
+    compactness, labels, centers = cv2.kmeans(
+        img, k, None, criteria, 10, flags)
+    centers = np.sort(centers, axis=0)
+
+    return centers[i_val].astype(int), centers, hist
