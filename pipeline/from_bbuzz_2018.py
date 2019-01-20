@@ -23,13 +23,30 @@ _, binary_thresh = cv2.threshold(im, 0, 255, cv2.THRESH_BINARY_INV)
 
 cv2.imwrite("./process/1.jpg", binary_thresh)
 
-lines = cv2.HoughLinesP(binary_thresh, 1, np.pi/180,
-                        100)
+
+rho = 1  # distance resolution in pixels of the Hough grid
+theta = np.pi / 180  # angular resolution in radians of the Hough grid
+threshold = 100  # minimum number of votes (intersections in Hough grid cell)
+min_line_length = 600/2.0  # minimum number of pixels making up a line
+max_line_gap = 20  # maximum gap in pixels between connectable line segments
+# line_image = np.copy(im) * 0  # creating a blank to draw lines on
+
+lines = cv2.HoughLinesP(binary_thresh, rho, theta, threshold,
+                        min_line_length, max_line_gap)
+
 angle = 0
+
+
+line_image = image.copy()
+
 for line in lines:
     x1, y1, x2, y2 = line[0]
     r = np.arctan2(y2 - y1, x2 - x1)
     angle += np.arctan2(y2 - y1, x2 - x1)
+    cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 5)
+
+lines_edges = cv2.addWeighted(image.copy(), 0.8, line_image, 1, 0)
+cv2.imwrite("./process/1b.jpg", lines_edges)
 
 avg_radian = angle / len(lines)
 avg_angle = avg_radian * 180 / np.pi
@@ -39,12 +56,13 @@ print("Average angle is %f °", avg_angle)
 # Rotate the image
 (height, width) = gray.shape[:2]
 center = (width // 2, height // 2)
-matrix = cv2.getRotationMatrix2D(center, avg_angle, 1.0)
+rot_mat = cv2.getRotationMatrix2D(center, avg_angle, 1.0)
 rotated = cv2.warpAffine(
     gray,
-    matrix,
+    rot_mat,
     (width, height),
-    flags=cv2.INTER_CUBIC,
+    flags=cv2.INTER_LINEAR,
+    # flags=cv2.INTER_CUBIC,
     borderMode=cv2.BORDER_REPLICATE,
 )
 
