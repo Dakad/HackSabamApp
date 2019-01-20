@@ -112,8 +112,7 @@ def get_transform(image, contour, ratio, has_effect=False):
     return (warped, effect)
 
 
-def deskew(gray):
-    correct = {}
+def deskew(image, gray):
     # Flip the foreground
     gray = cv2.bitwise_not(gray)
 
@@ -127,7 +126,6 @@ def deskew(gray):
     # https://stackoverflow.com/questions/15956124/minarearect-angles-unsure-about-the-angle-returned
     angle = cv2.minAreaRect(coords)[-1]  # Return val btwn [-90,0]
 
-    correct["from"] = angle
     # As the rect rotate clockwise, angle --> 0
     if angle < -45:
         angle = -(90 + angle)
@@ -135,18 +133,34 @@ def deskew(gray):
         # Just take the inverse
         angle = -angle
 
-    correct["to"] = angle
+    rotated = None
 
-    # Rotate the image
-    (height, width) = gray.shape[:2]
-    center = (width // 2, height // 2)
-    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotated = cv2.warpAffine(
-        gray,
-        matrix,
-        (width, height),
-        flags=cv2.INTER_CUBIC,
-        borderMode=cv2.BORDER_REPLICATE,
-    )
-    correct["rotated"] = rotated
-    return correct
+    if(np.abs(angle) != 0):
+        # Rotate the image
+        (height, width) = gray.shape[:2]
+        center = (width // 2, height // 2)
+        matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(
+            image,
+            matrix,
+            (width, height),
+            flags=cv2.INTER_CUBIC,
+            borderMode=cv2.BORDER_REPLICATE,
+        )
+
+    return [rotated, angle]
+
+
+def remove_shadow(image):
+    result_planes = []
+    rgb_planes = cv2.split(image)
+
+    for plan in rgb_planes:
+        img_dilated = cv2.dilate(image, np.ones((7, 7), np.uint8))
+        img_bg = cv2.medianBlur(img_dilated, 21)
+        img_diff = 255 - cv2.absdiff(plane, img_bg)
+        img_norm = cv2.normalize(
+            img_diff, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
+        result_planes.append(img_diff)
+    result = cv2.merge(result_planes)
+    return result
