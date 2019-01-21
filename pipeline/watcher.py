@@ -3,28 +3,21 @@ import os
 import time
 from threading import Thread
 
-_DEFAULT = {
-    "task_path": "../data/tasks",
-    "idle_time": 60 * 10,  # 10 mins
-}
+from config import Config
 
 
-class Watcher():
+class Watcher(object):
 
-    path_to_watch = _DEFAULT['task_path']
-    idle_time = _DEFAULT['idle_time']
     before = dict()
 
     @staticmethod
-    def init(path=None, idle=None):
-        if(path is not None):
-            Watcher.path_to_watch = path
-        if(idle is not None):
-            Watcher.idle_time = idle
+    def init(path=Config.TASK_DIR, idle=Config.IDLE_TIME):
+
+        Watcher.path_to_watch = path
+        Watcher.idle_time = idle
 
         os.makedirs(Watcher.path_to_watch, exist_ok=True)
 
-        Watcher.before = dict()
         Watcher.before = dict([
             (f, None) for f in os.listdir(Watcher.path_to_watch)
         ])
@@ -70,6 +63,7 @@ class Task(Thread):
 
         finally:
             # TODO: Notify the Watcher about the failed task
+            pass
 
 
 if __name__ == "__main__":
