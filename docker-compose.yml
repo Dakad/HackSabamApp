@@ -1,0 +1,62 @@
+version: '3.4'
+
+services:
+  pipeline:
+    build:
+      context: ./
+      dockerfile: ./pipeline/Dockerfile
+    volumes:
+      - type: mount
+        source: ${UPLOAD_DIR}
+        target: /app/data/uploads/
+      - type: mount
+        source: ${TASK_DIR}
+        target: /app/data/tasks/
+      - type: mount
+        source: ${FAILED_DIR}
+        target: /app/data/failed/
+      - type: mount
+        source: ${PROCESS_DIR}
+        target: /app/data/optimised/
+      - type: mount
+        source: ${LOG_DIR}
+        target: /app/data/logs/
+      - type: mount
+        source: ./pipeline/
+        target: /app/pipeline/
+  webapp:
+    build:
+      context: ./
+      dockerfile: ./webapp/Dockerfile
+    volumes:
+      - type: mount
+        source: ./webapp/
+        target: /app/webapp/
+    depends_on:
+      - my_sql
+      - no_sql
+    # uncomment for debugging the service - container does not try to start dev server
+    #entrypoint: ["sh", "-c", "sleep infinity"]
+  my_sql:
+    #https://hub.docker.com/_/postgres/
+    image: postgres:10-alpine
+    restart: always
+    volumes:
+      - type: mount
+        source: ${DOCKER_POSTRES_DIR}
+        target: /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_SQL_USER}
+      POSTGRES_PASSWORD: ${DB_SQL_PWD}
+      POSTGRES_DB: ${DB_SQL_DB}
+    ports:
+      #make db accessible locally
+      - ${DB_SQL_PORT}:5432
+  no_sql:
+    image: mongo:3.6.9
+    volumes:
+      - type: mount
+        source: ${DOCKER_MONGO_DIR}
+        target: /data/db
+    ports:
+      - ${DB_NOSQL_PORT}:27017

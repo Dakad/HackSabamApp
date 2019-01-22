@@ -1,14 +1,10 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 AS pipeline
 
 # Ensure that we always use UTF-8 and with English GB locale
 # RUN locale-gen en_GB.UTF-8
 
 ENV TZ=Europe/Brussels
 ENV PYTHONIOENCODING=utf-8
-# ENV LC_ALL=en_GB.UTF-8
-# ENV LANG=en_GB.UTF-8
-# ENV LANGUAGE=en_GB.UTF-8
-
 
 # Bring system up-to-date
 RUN apt-get update && apt-get upgrade -y
@@ -41,19 +37,16 @@ RUN apt-get install -y --no-install-recommends \
 
 
 ## Copy scripts into the container for convenience (you could mount a folder as well)
-RUN bash -c 'mkdir -p /pipeline/{tasks,uploads,failed}'
+RUN bash -c 'mkdir -p /app/{pipeline,logs,data/{tasks,uploads,failed}}'
 
-WORKDIR /pipeline
+COPY config.py app.py pipeline/requirements.txt /app/
 
-# COPY . /pipeline
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
+WORKDIR /app
 
-COPY ./requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
+# Allows for log messages to be immediately dumped to the stream instead of being buffered
 ENV PYTHONUNBUFFERED 1
-
-# EXPOSE 8081
 
 # Clear out the apt cache
 RUN apt-get -y clean autoclean \
