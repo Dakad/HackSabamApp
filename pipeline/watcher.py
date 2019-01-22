@@ -18,6 +18,9 @@ class Watcher(object):
 
         os.makedirs(Watcher.path_to_watch, exist_ok=True)
 
+        if Config.DEBUG:
+            os.makedirs(Config.PROCESS_DIR, exist_ok=True)
+
         Watcher.before = dict([
             (f, None) for f in os.listdir(Watcher.path_to_watch)
         ])
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-p", "--path", type=str, help="Path to watch")
     arg_parser.add_argument(
-        "-i", "--idle", type=int, help="Idle time between each watch")
+        "-i", "--idle", type=int, default=3, help="Idle time between each watch")
     args = vars(arg_parser.parse_args())
 
     Watcher.init(**args)

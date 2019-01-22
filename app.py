@@ -56,5 +56,4 @@ if __name__ == "__main__":
         help="Which part of the app to run : pipeline, web, all (by default: %(default)s)")
 
     args = vars(arg_parser.parse_args())
-    print(args)
     main(**args)

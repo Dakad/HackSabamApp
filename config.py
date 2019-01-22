@@ -14,6 +14,7 @@ _DEF_VAL = {
     "UPLOAD_DIR": os.path.join(base_dir, 'data', 'uploads'),
     "TASK_DIR": os.path.join(base_dir, 'data', 'tasks'),
     "FAILED_DIR": os.path.join(base_dir, 'data', 'failed'),
+    "PROCESS_DIR": os.path.join(base_dir, 'data', 'optmised'),
     "IDLE_TIME": 60 * 10,  # 10 mins
     'IMAGE_TYPES': "jpg,jpeg,png"
 }
@@ -30,11 +31,15 @@ def _rand_string():
 class Config(object):
     DEFAULTS = _DEF_VAL
 
+    DEBUG = os.environ.get('DEBUG', True)
+
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', False)
+
     LOG_DIR = os.environ.get('LOG_DIR', _DEF_VAL['LOG_DIR'])
     UPLOAD_DIR = os.environ.get('UPLOAD_DIR', _DEF_VAL['UPLOAD_DIR'])
     TASK_DIR = os.environ.get('TASK_DIR', _DEF_VAL['TASK_DIR'])
     FAILED_DIR = os.environ.get('FAILED_DIR', _DEF_VAL['FAILED_DIR'])
+    PROCESS_DIR = os.environ.get('PROCESS_DIR', _DEF_VAL['PROCESS_DIR'])
     IDLE_TIME = int(os.environ.get('IDLE_TIME', _DEF_VAL['IDLE_TIME']))
     OCR_LANGS = os.environ.get(
         'OCR_LANGS', _DEF_VAL['OCR_LANGUAGES']).split(',')
