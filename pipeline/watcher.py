@@ -32,7 +32,7 @@ class Watcher(object):
             ])
             new_files = [f for f in after if not f in Watcher.before]
 
-            for (upload, _) in new_files:
+            for upload in new_files:
                 Task(upload).start()
 
             Watcher.before = after
