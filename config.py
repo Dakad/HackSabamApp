@@ -9,13 +9,14 @@ load_dotenv(os.path.join(base_dir, '.env'))
 
 _DEF_VAL = {
     'LOCAL_DB': 'sqlite:///' + os.path.join(base_dir, 'data', 'app.db'),
-    'OCR_LANGUAGES': 'eng, fra, spa',
     'LOG_DIR': os.path.join(base_dir, 'logs'),
     "UPLOAD_DIR": os.path.join(base_dir, 'data', 'uploads'),
     "TASK_DIR": os.path.join(base_dir, 'data', 'tasks'),
     "FAILED_DIR": os.path.join(base_dir, 'data', 'failed'),
     "PROCESS_DIR": os.path.join(base_dir, 'data', 'optmised'),
     "IDLE_TIME": 60 * 10,  # 10 mins
+    'OCR_LANGUAGES': 'eng, fra, spa',
+    'IMG_RESIZE_HEIGHT': 750,
     'IMAGE_TYPES': "jpg,jpeg,png"
 }
 
@@ -43,6 +44,8 @@ class Config(object):
     IDLE_TIME = int(os.environ.get('IDLE_TIME', _DEF_VAL['IDLE_TIME']))
     OCR_LANGS = os.environ.get(
         'OCR_LANGS', _DEF_VAL['OCR_LANGUAGES']).split(',')
+    IMG_RESIZE_HEIGHT = int(os.environ.get(
+        'IMG_RESIZE_HEIGHT', _DEF_VAL['IMG_RESIZE_HEIGHT']))
 
     DB_SQL_URI = os.environ.get('DB_SQL_URI', _DEF_VAL['LOCAL_DB'])
     DB_SQL_HOST = os.environ.get('DB_SQL_HOST')

@@ -4,6 +4,7 @@ import cv2
 import math
 import pytesseract
 
+from config import Config
 from improv import detect_contours, detect_edge, get_transform, deskew
 
 
@@ -21,66 +22,99 @@ class Optimiser(object):
         self._img_path = args['image']
         self._img = cv2.imread(args["image"])
         self._img_original = self.img.copy()
+        self._mser = cv2.MSER_create()
 
-    def _process_4_pt(**args):
+    def _process_4_pt(self):
         transform = None
 
         # Resize to speed up the processing
-        img = imutils.resize(args['img'], height=750)
-        ratio = args['img'].shape[0] / 500.0
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        self._img = imutils.resize(self._img, height=Config.IMG_RESIZE_HEIGHT)
+        self._ratio = self._img.shape[0] / Config.IMG_RESIZE_HEIGHT
+        self._gray = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
 
-        cv2.imwrite("./process/4_pt_1img.jpg", img)
-        cv2.imwrite("./process/4_pt_1gray.jpg", gray)
+        if Config.DEBUG:
+            cv2.imwrite("./process/4_pt_1img.jpg", self._img)
+            cv2.imwrite("./process/4_pt_1gray.jpg", self._gray)
 
-        contours = detect_contours(cv2.Canny(gray, 75, 200))
+        contours = detect_contours(cv2.Canny(self._gray, 75, 200))
 
-        has_contours = len(contours) > 1
+        has_contours = bool(len(contours))
         if has_contours:
-            img2 = gray.copy()
+            img2 = self._gray.copy()
             cv2.drawContours(img2, contours, -1, (0, 255, 0), 2)
-            cv2.imwrite("./process/4_pt_2contours.jpg", img2)
+            if Config.DEBUG:
+                cv2.imwrite("./process/4_pt_2contours.jpg", img2)
 
             (warped, effect) = get_transform(
-                args["img_original"], contours[0], ratio, has_effect=True)
+                self._img_original, contours[0], self._ratio, has_effect=True)
 
-            cv2.imwrite("./process/4_pt_3warped.jpg", warped)
+            if Config.DEBUG:
+                cv2.imwrite("./process/4_pt_3warped.jpg", warped)
 
             warped_edges = cv2.Canny(warped, 75, 200)
-            cv2.imwrite("./process/4_pt_3warped_edges.jpg", warped_edges)
 
-            if effect is not None:
+            if Config.DEBUG:
+                cv2.imwrite("./process/4_pt_3warped_edges.jpg", warped_edges)
+
+            if Config.DEBUG and effect is not None:
                 cv2.imwrite("./process/4_pt_4effect.jpg", effect)
 
             transform = warped
-        else:
-            print(" No 4-pt contour found ")
 
         return [has_contours, transform]
 
-    def _apply_deskew(transform, gray):
-        (rotated, angle) = deskew(transform, gray)
+    def _apply_deskew(self):
+        (rotated, angle) = deskew(self._img, self._gray)
 
         if(math.fabs(angle) == 0):
-            return transform
-        print("Rotation Angle : {:.3f}°".format(angle))
-        cv2.imwrite("./process/improv_2rotated.jpg", rotated)
-        return rotated
+            return
+        if Config.DEBUG:
+            print("Rotation Angle : {:.3f}°".format(angle))
+            cv2.imwrite("./process/improv_2rotated.jpg", rotated)
+
+        self._img = rotated
+
+    def _detect_text_regions(self):
+        inverse = cv2.bitwise_not(self._gray)
+
+        # Detect regions in gray scale image
+        regions, _ = mser.detectRegions(inverse)
+
+        hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions]
+        if Config.DEBUG:
+            vis = self._img.copy()
+            cv2.polylines(vis, hulls, 1, (0, 255, 0))
+            cv2.imwrite("./process/1txt_lines.jpg", vis)
+
+        mask = np.zeros((image.shape[0], self.img.shape[1], 1), dtype=np.uint8)
+
+        for contour in hulls:
+            cv2.drawContours(mask, [contour], -1, (255, 255, 255), -1)
+
+        edged = cv2.Canny(inverse, 75, 200)
+
+        # this is used to find only text regions, remaining are ignored
+        text_only = cv2.bitwise_and(inverse, edged, mask=mask)
+        if Config.DEBUG:
+            cv2.imwrite("./process/2txt_only.jpg", text_only)
+
+        return text_only
 
     def exec(self):
 
-        (has_4_pth, transform) = self._process_4_pt(**opts)
-        if has_4_pth:
-            print(" 4 pt Contour detected ")
-            self._img = transform
-        else:
-            # Resize to speed up the processing
-            self._img = imutils.resize(self._img, height=750)
+        (has_4_pth, transform) = self._process_4_pt()
+        if not has_4_pth:
+            if Config.DEBUG:
+                print(" 4 pt Contour not detected ")
+                # Resize to speed up the processing
+                self._img = imutils.resize(
+                    self._img, height=Config.IMG_RESIZE_HEIGHT)
+                self._gray = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
+                self._ratio = self._img.shape[0] / Config.IMG_RESIZE_HEIGHT
 
-        self._gray = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
-        ratio = self._img.shape[0] / 750.0
+        self._apply_deskew()
 
-        transform = self._apply_deskew(self._img, self._gray)
+        self.transform = self._detect_text_regions()
 
         return transform
 
