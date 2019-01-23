@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   pipeline:
+    container_name: pipeline-builder
     build:
       context: ./
       dockerfile: ./pipeline/Dockerfile
@@ -25,10 +26,17 @@ services:
         source: ./pipeline/
         target: /app/pipeline/
   webapp:
+    container_name: webapp-builder
     build:
       context: ./
       dockerfile: ./webapp/Dockerfile
     volumes:
+      - type: mount
+        source: ${UPLOAD_DIR}
+        target: /app/data/uploads/
+      - type: mount
+        source: ${TASK_DIR}
+        target: /app/data/tasks/
       - type: mount
         source: ./webapp/
         target: /app/webapp/
@@ -46,12 +54,12 @@ services:
         source: ${DOCKER_POSTRES_DIR}
         target: /var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${DB_SQL_USER}
-      POSTGRES_PASSWORD: ${DB_SQL_PWD}
-      POSTGRES_DB: ${DB_SQL_DB}
+      - 'POSTGRES_USER: ${DB_SQL_USER}'
+      - 'POSTGRES_PASSWORD: ${DB_SQL_PWD}'
+      - 'POSTGRES_DB: ${DB_SQL_DB}'
     ports:
       #make db accessible locally
-      - ${DB_SQL_PORT}:5432
+      - '${DB_SQL_PORT}:5432'
   no_sql:
     image: mongo:3.6.9
     volumes:
@@ -59,4 +67,4 @@ services:
         source: ${DOCKER_MONGO_DIR}
         target: /data/db
     ports:
-      - ${DB_NOSQL_PORT}:27017
+      - '${DB_NOSQL_PORT}:27017'

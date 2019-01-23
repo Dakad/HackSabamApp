@@ -39,11 +39,13 @@ RUN apt-get install -y --no-install-recommends \
 ## Copy scripts into the container for convenience (you could mount a folder as well)
 RUN bash -c 'mkdir -p /app/{pipeline,logs,data/{tasks,uploads,failed}}'
 
-COPY config.py app.py pipeline/requirements.txt /app/
+COPY .env config.py app.py pipeline/requirements.txt /app/
 
 RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
 WORKDIR /app
+
+VOLUME [ "/app/pipeline", "/app/logs", "/app/data/tasks", "/app/data/uploads", "/app/data/failed", "/app/data/optimised" ]
 
 # Allows for log messages to be immediately dumped to the stream instead of being buffered
 ENV PYTHONUNBUFFERED 1

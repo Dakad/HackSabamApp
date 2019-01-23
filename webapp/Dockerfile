@@ -22,11 +22,13 @@ RUN apk add --no-cache --virtual .build-deps \
 # copy scripts into the container for convenience (you could mount a folder as well)
 RUN mkdir /app/
 
-COPY config.py app.py webapp/requirements.txt /app/
+COPY .env config.py app.py webapp/requirements.txt /app/
 
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 ENV PYTHONUNBUFFERED 1
+
+VOLUME [ "/app/webapp", "/app/data/tasks", "/app/data/uploads" ]
 
 EXPOSE ${WEBAPP_PORT}
 
