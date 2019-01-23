@@ -70,6 +70,7 @@ docs/_build/
 
 # PyBuilder
 target/
+.fuse_hidden*
 
 # Jupyter Notebook
 .ipynb_checkpoints
