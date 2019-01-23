@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+data/
 develop-eggs/
 dist/
 downloads/
@@ -32,6 +33,7 @@ MANIFEST
 *.spec
 
 # Installer logs
+logs/*
 pip-log.txt
 pip-delete-this-directory.txt
 
@@ -68,6 +70,7 @@ docs/_build/
 
 # PyBuilder
 target/
+.fuse_hidden*
 
 # Jupyter Notebook
 .ipynb_checkpoints

@@ -5,10 +5,6 @@ FROM ubuntu:18.04
 
 ENV TZ=Europe/Brussels
 ENV PYTHONIOENCODING=utf-8
-# ENV LC_ALL=en_GB.UTF-8
-# ENV LANG=en_GB.UTF-8
-# ENV LANGUAGE=en_GB.UTF-8
-
 
 # Bring system up-to-date
 RUN apt-get update && apt-get upgrade -y
@@ -25,6 +21,8 @@ RUN apt-get install -y --no-install-recommends \
 	# libtiff5-dev \
 	# libtool \
 	# pkg-config \
+	libsm6 libxext6 \
+	libxrender1 libfontconfig1 \
 	python3 \
 	python3-dev \
 	python3-setuptools \
@@ -38,19 +36,19 @@ RUN apt-get install -y --no-install-recommends \
 # zlib1g-dev
 
 
-# Copy scripts into the container for convenience (you could mount a folder as well)
-RUN mkdir -p /pipeline/{tasks,uploads,failed}
+## Copy scripts into the container for convenience (you could mount a folder as well)
+RUN bash -c 'mkdir -p /app/{pipeline,logs,data/{tasks,uploads,failed}}'
 
-WORKDIR /pipeline
+COPY .env config.py app.py pipeline/requirements.txt /app/
 
-COPY . /pipeline
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
-COPY ./requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+WORKDIR /app
 
+VOLUME [ "/app/pipeline", "/app/logs", "/app/data/tasks", "/app/data/uploads", "/app/data/failed", "/app/data/optimised" ]
+
+# Allows for log messages to be immediately dumped to the stream instead of being buffered
 ENV PYTHONUNBUFFERED 1
-
-# EXPOSE 8081
 
 # Clear out the apt cache
 RUN apt-get -y clean autoclean \

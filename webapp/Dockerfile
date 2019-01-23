@@ -5,8 +5,6 @@ RUN apk update
 
 RUN apk add --no-cache --virtual .build-deps \
     build-base \
-    postgresql postgresql-dev \
-    libffi-dev \
     && find /usr/local \
     \( -type d -a -name test -o -name tests \) \
     -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
@@ -22,19 +20,17 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk del .build-deps
 
 # copy scripts into the container for convenience (you could mount a folder as well)
-RUN mkdir -p /app
-RUN mkdir -p /pipeline/{tasks,uploads}
+RUN mkdir /app/
 
-WORKDIR /app
+COPY .env config.py app.py webapp/requirements.txt /app/
 
-COPY . /app
-
-COPY ./requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 
-EXPOSE 8080
+VOLUME [ "/app/webapp", "/app/data/tasks", "/app/data/uploads" ]
+
+EXPOSE ${WEBAPP_PORT}
 
 # Clear out the apk cache
 RUN apk del build-base && rm -rf /var/cache/apk/*

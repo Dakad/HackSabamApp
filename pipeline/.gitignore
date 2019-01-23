@@ -1,0 +1,10 @@
+
+# Custom
+process/
+tasks/
+uploads/
+failed/
+img/*
+
+.fuse_hidden*
+frozen_*.pb
