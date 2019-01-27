@@ -1,3 +1,4 @@
+from webapp import main as webappMain
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -6,7 +7,6 @@ from config import Config
 
 
 def config_log(log_instance="app"):
-    print(Config.LOG_TO_STDOUT)
     if Config.LOG_TO_STDOUT:
         stream_handler = logging.StreamHandler()
         logging.root.addHandler(stream_handler)
@@ -34,9 +34,15 @@ def run_watcher():
 
 
 def run_web_app():
-    # from webapp import main
-    logging.info("TO Complete in the future ...")
-    pass
+
+
+<< << << < HEAD
+# from webapp import main
+logging.info("TO Complete in the future ...")
+pass
+== == == =
+webappMain.run(Config)
+>>>>>> > Add run for webapp
 
 
 def main(run='all'):

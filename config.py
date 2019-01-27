@@ -17,7 +17,9 @@ _DEF_VAL = {
     "IDLE_TIME": 60 * 10,  # 10 mins
     'OCR_LANGUAGES': 'eng, fra, spa',
     'IMG_RESIZE_HEIGHT': 750,
-    'IMAGE_TYPES': "jpg,jpeg,png"
+    'IMAGE_TYPES': "jpg,jpeg,png",
+    'WEBAPP_PORT': 8081,
+    'WEBAPP_TITLE':  'App Hack Sabam',
 }
 
 
@@ -46,6 +48,9 @@ class Config(object):
         'OCR_LANGS', _DEF_VAL['OCR_LANGUAGES']).split(',')
     IMG_RESIZE_HEIGHT = int(os.environ.get(
         'IMG_RESIZE_HEIGHT', _DEF_VAL['IMG_RESIZE_HEIGHT']))
+
+    WEBAPP_PORT = int(os.environ.get('WEBAPP_PORT', _DEF_VAL['WEBAPP_PORT']))
+    WEBAPP_TITLE = os.environ.get('WEBAPP_TITLE', _DEF_VAL['WEBAPP_TITLE'])
 
     DB_SQL_URI = os.environ.get('DB_SQL_URI', _DEF_VAL['LOCAL_DB'])
     DB_SQL_HOST = os.environ.get('DB_SQL_HOST')
