@@ -9,51 +9,48 @@ GIT_LAST_VERS = $(shell git tag -l v* | tail -n1)
 BUILD_PIPELINE 	= pipeline
 BUILD_WEBAPP 	= webapp
 
+CONTAINER_PIPELINE = $(BUILD_PIPELINE)-instance
+CONTAINER_WEBAPP = $(BUILD_WEBAPP)-instance
+
+CMD_RUN_PIPELINE = python3 /app/app.py --run pipeline
+CMD_RUN_WEBAPP = python /app/app.py --run web
 
 
-build: build-pipeline build-webapp
 
+
+build-all: build-pipeline build-webapp
 build-pipeline: 
-	docker-compose up $(BUILD_PIPELINE)
+	docker-compose up --build --no-deps $(BUILD_PIPELINE)
 
 build-webapp: 
-	docker-compose up $(BUILD_WEBAPP)
+	docker-compose up --build --no-deps $(BUILD_WEBAPP)
 
 
 shell-pipeline:
-	docker-compose run --rm $(BUILD_PIPELINE) /bin/bash
-
-shell-webapp:
-	docker-compose run --rm $(BUILD_WEBAPP) /bin/bash
+	docker-compose run -d $(BUILD_PIPELINE) /bin/bash
 
 
-run: run-pipeline run-webapp
-
+run-all: run-pipeline run-webapp
 run-pipeline:
-	docker-compose run -d --name $(BUILD_PIPELINE) python3 app.py --run pipeline
-
+	docker-compose run -d --name $(CONTAINER_PIPELINE) --entrypoint $(BUILD_PIPELINE) $(CMD_RUN_PIPELINE)
 run-webapp:
-	docker-compose run -d --name $(BUILD_WEBAPP) python3 app.py --run web
+	docker-compose run -d --name $(CONTAINER_WEBAPP) --entrypoint $(BUILD_WEBAPP) $(CMD_RUN_WEBAPP)
 
 
-stop : stop-pipeline stop-webapp
-
+stop-all : stop-pipeline stop-webapp
 stop-pipeline:
 	docker-compose stop $(BUILD_PIPELINE)
-
 stop-webapp:
 	docker-compose stop $(BUILD_WEBAPP)
 
 
-rm: rm-pipeline rm-webapp
-
+rm-all: rm-pipeline rm-webapp
 rm-pipeline:
-	docker rm rpi-$(CONTAINER_NAME)-$(CONTAINER_INSTANCE)
-
+	docker rm $(CONTAINER_PIPELINE)
 rm-webapp:
-	docker rm rpi-$(CONTAINER_NAME)-$(CONTAINER_INSTANCE)
+	docker rm $(CONTAINER_WEBAPP)
 
 
 all: test 
 
-.PHONY: build run 
+# .PHONY: build run 

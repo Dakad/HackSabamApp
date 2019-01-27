@@ -50,6 +50,8 @@ VOLUME [ "/app/pipeline", "/app/logs", "/app/data/tasks", "/app/data/uploads", "
 # Allows for log messages to be immediately dumped to the stream instead of being buffered
 ENV PYTHONUNBUFFERED 1
 
+# ENTRYPOINT [ "python3", "/app/app.py",  "--run", "pipeline"]
+
 # Clear out the apt cache
 RUN apt-get -y clean autoclean \
 	&& apt-get -y autoremove \

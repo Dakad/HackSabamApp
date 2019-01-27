@@ -2,10 +2,10 @@ version: '3.4'
 
 services:
   pipeline:
-    container_name: pipeline-builder
     build:
       context: ./
       dockerfile: ./pipeline/Dockerfile
+    command: ['python3', '/app/app.py', '--run', 'pipeline']
     volumes:
       - type: mount
         source: ${UPLOAD_DIR}
@@ -26,10 +26,10 @@ services:
         source: ./pipeline/
         target: /app/pipeline/
   webapp:
-    container_name: webapp-builder
     build:
       context: ./
       dockerfile: ./webapp/Dockerfile
+    command: ['python', '/app/app.py', '--run', 'web']
     volumes:
       - type: mount
         source: ${UPLOAD_DIR}
@@ -48,7 +48,6 @@ services:
   my_sql:
     #https://hub.docker.com/_/postgres/
     image: postgres:10-alpine
-    restart: always
     volumes:
       - type: mount
         source: ${DOCKER_POSTRES_DIR}

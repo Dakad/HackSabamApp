@@ -32,6 +32,8 @@ VOLUME [ "/app/webapp", "/app/data/tasks", "/app/data/uploads" ]
 
 EXPOSE ${WEBAPP_PORT}
 
+# ENTRYPOINT [ "python", "/app/app.py", "--run", "web" ]
+
 # Clear out the apk cache
 RUN apk del build-base && rm -rf /var/cache/apk/*
 
