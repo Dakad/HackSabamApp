@@ -22,11 +22,11 @@ _DEF_VAL = {
 
 
 def _rand_string():
-    from random import choice
+    from random import choice, randint
     from string import ascii_letters, digits
 
-    pattern = digits+ascii_letters + "?&~#-_@%$µ*!§€+"
-    return ''.join(choice(pattern) for i in range(39))
+    pattern = digits+ascii_letters + "?&~#-_@%$*!§+"
+    return ''.join(choice(pattern) for i in range(randint(17, 39)))
 
 
 class Config(object):
