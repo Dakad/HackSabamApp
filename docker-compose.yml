@@ -30,6 +30,9 @@ services:
       context: ./
       dockerfile: ./webapp/Dockerfile
     command: ['python', '/app/app.py', '--run', 'web']
+    # command: ['python', '/app/webapp/main.py']
+    ports:
+      - '${WEBAPP_PORT}:${WEBAPP_PORT}'
     volumes:
       - type: mount
         source: ${UPLOAD_DIR}

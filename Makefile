@@ -27,8 +27,9 @@ build-webapp:
 
 
 shell-pipeline:
-	docker-compose run -d $(BUILD_PIPELINE) /bin/bash
-
+	docker-compose run --rm $(BUILD_PIPELINE) /bin/sh -c "[ -e /bin/bash ] && /bin/bash || /bin/sh"
+shell-webapp:
+	docker-compose run --rm $(BUILD_WEBAPP) /bin/sh -c "[ -e /bin/bash ] && /bin/bash || /bin/sh"
 
 run-all: run-pipeline run-webapp
 run-pipeline:
