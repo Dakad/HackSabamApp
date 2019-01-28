@@ -35,7 +35,7 @@ def run_watcher():
 
 def run_web_app():
     import webapp as webappMain
-    webappMain.run()
+    webappMain.run(Config)
 
 
 def main(run='all'):
