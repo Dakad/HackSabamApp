@@ -5,7 +5,7 @@ import math
 import pytesseract
 
 from config import Config
-from improv import detect_contours, detect_edge, get_transform, deskew
+from .improv import detect_contours, detect_edge, get_transform, deskew
 
 
 class Optimiser(object):
