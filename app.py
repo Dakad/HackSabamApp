@@ -1,4 +1,3 @@
-from webapp import main as webappMain
 import os
 import logging
 from logging.handlers import RotatingFileHandler

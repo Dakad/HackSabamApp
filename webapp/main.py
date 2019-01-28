@@ -5,7 +5,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 
-from upload import UploadHandler, UploadStreamHandler
+from .upload import UploadHandler, UploadStreamHandler
 
 
 class My404Handler(RequestHandler):
