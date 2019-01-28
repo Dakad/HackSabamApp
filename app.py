@@ -34,15 +34,8 @@ def run_watcher():
 
 
 def run_web_app():
-
-
-<< << << < HEAD
-# from webapp import main
-logging.info("TO Complete in the future ...")
-pass
-== == == =
-webappMain.run(Config)
->>>>>> > Add run for webapp
+    import webapp as webappMain
+    webappMain.run()
 
 
 def main(run='all'):
